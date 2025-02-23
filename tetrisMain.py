@@ -11,7 +11,7 @@ COLUMNS, ROWS = WIDTH // GRID_SIZE, HEIGHT // GRID_SIZE
 WHITE, BLACK = (255, 255, 255), (0, 0, 0)
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 165, 0)]
 
-# Tetromino shapes
+# Tetris shapes
 SHAPES = [
     [[1, 1, 1, 1]],  # I shape
     [[1, 1], [1, 1]],  # O shape
