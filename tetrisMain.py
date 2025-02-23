@@ -1,4 +1,4 @@
-import pygame#INSTALLED FUCKING FINALLY
+import pygame
 import random
 
 # Initialize pygame
@@ -11,7 +11,7 @@ COLUMNS, ROWS = WIDTH // GRID_SIZE, HEIGHT // GRID_SIZE
 WHITE, BLACK = (255, 255, 255), (0, 0, 0)
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 165, 0)]
 
-# Tetris shapes
+# Tetromino shapes
 SHAPES = [
     [[1, 1, 1, 1]],  # I shape
     [[1, 1], [1, 1]],  # O shape
@@ -27,9 +27,27 @@ class Tetromino:
         self.shape = random.choice(SHAPES)
         self.color = random.choice(COLORS)
         self.x, self.y = COLUMNS // 2 - len(self.shape[0]) // 2, 0
+        self.landed = False
 
     def rotate(self):
-        self.shape = [list(row) for row in zip(*self.shape[::-1])]
+        if not self.landed:
+            rotated_shape = [list(row) for row in zip(*self.shape[::-1])]
+            if self.y + len(rotated_shape) <= ROWS:
+                self.shape = rotated_shape
+
+    def move(self, dx, dy):
+        if not self.landed and 0 <= self.x + dx < COLUMNS - len(self.shape[0]) + 1 and self.y + dy + len(self.shape) <= ROWS:
+            self.x += dx
+            self.y += dy
+    
+    def hard_drop(self):
+        while self.y + len(self.shape) < ROWS:
+            self.y += 1
+        self.landed = True
+
+    def check_landing(self):
+        if self.y + len(self.shape) >= ROWS:
+            self.landed = True
 
 # Game functions
 def draw_grid(surface):
@@ -51,6 +69,8 @@ def main():
     clock = pygame.time.Clock()
     running = True
     tetromino = Tetromino()
+    fall_time = 0
+    fall_speed = 30
 
     while running:
         screen.fill(BLACK)
@@ -61,8 +81,27 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
-        clock.tick(5)
+            elif event.type == pygame.KEYDOWN:
+                if not tetromino.landed:
+                    if event.key == pygame.K_LEFT:
+                        tetromino.move(-1, 0)
+                    elif event.key == pygame.K_RIGHT:
+                        tetromino.move(1, 0)
+                    elif event.key == pygame.K_DOWN:
+                        tetromino.move(0, 1)
+                    elif event.key == pygame.K_UP:
+                        tetromino.rotate()
+                    elif event.key == pygame.K_SPACE:
+                        tetromino.hard_drop()
+        
+        fall_time += 1
+        if fall_time >= fall_speed:
+            if not tetromino.landed:
+                tetromino.move(0, 1)
+                tetromino.check_landing()
+            fall_time = 0
+        
+        clock.tick(10)
 
     pygame.quit()
 
