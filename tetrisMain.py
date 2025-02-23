@@ -1,4 +1,4 @@
-import pygame
+import pygame#INSTALLED FUCKING FINALLY
 import random
 
 # Initialize pygame
