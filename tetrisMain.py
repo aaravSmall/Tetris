@@ -68,6 +68,16 @@ class Tetromino:
                 if cell:
                     self.grid[self.y + row_idx][self.x + col_idx] = self.color
 
+def clear_rows(grid):
+    full_rows = [i for i in range(ROWS) if all(grid[i])]
+    points = [0, 100, 300, 500, 800]  # Points for clearing 1, 2, 3, or 4 rows
+    score = 0
+    for row in full_rows:
+        del grid[row]
+        grid.insert(0, [None for _ in range(COLUMNS)])
+    score += points[len(full_rows)] if len(full_rows) < len(points) else points[-1]
+    return score
+
 def draw_grid(surface):
     for x in range(0, WIDTH, GRID_SIZE):
         pygame.draw.line(surface, WHITE, (x, 0), (x, HEIGHT))
@@ -93,6 +103,11 @@ def draw_tetrominos(surface, grid, active_tetromino):
                                                  (active_tetromino.y + row_idx) * GRID_SIZE, 
                                                  GRID_SIZE, GRID_SIZE), 2)
 
+def draw_score(surface, score):
+    font = pygame.font.Font(None, 36)
+    score_text = font.render(f"Score: {score}", True, WHITE)
+    surface.blit(score_text, (10, 10))
+
 def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
@@ -101,11 +116,13 @@ def main():
     tetromino = Tetromino(grid)
     fall_time = 0
     fall_speed = 30
+    score = 0
 
     while running:
         screen.fill(BLACK)
         draw_grid(screen)
         draw_tetrominos(screen, grid, tetromino)
+        draw_score(screen, score)
         pygame.display.flip()
         
         for event in pygame.event.get():
@@ -132,10 +149,11 @@ def main():
             fall_time = 0
         
         if tetromino.landed:
+            score += clear_rows(grid)
             tetromino = Tetromino(grid)
         
         clock.tick(10)
-
+    
     pygame.quit()
 
 if __name__ == "__main__":
