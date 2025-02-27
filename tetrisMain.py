@@ -8,7 +8,7 @@ pygame.init()
 WIDTH, HEIGHT = 300, 600
 GRID_SIZE = 30
 COLUMNS, ROWS = WIDTH // GRID_SIZE, HEIGHT // GRID_SIZE
-WHITE, BLACK = (255, 255, 255), (0, 0, 0)
+WHITE, BLACK, GRAY = (255, 255, 255), (0, 0, 0), (128, 128, 128)
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 165, 0)]
 
 # Tetromino shapes
@@ -68,59 +68,71 @@ class Tetromino:
                 if cell:
                     self.grid[self.y + row_idx][self.x + col_idx] = self.color
 
-# Game functions
 def draw_grid(surface):
     for x in range(0, WIDTH, GRID_SIZE):
         pygame.draw.line(surface, WHITE, (x, 0), (x, HEIGHT))
     for y in range(0, HEIGHT, GRID_SIZE):
         pygame.draw.line(surface, WHITE, (0, y), (WIDTH, y))
 
-def draw_tetrominos(surface, grid):
+def draw_tetrominos(surface, grid, active_tetromino):
     for y, row in enumerate(grid):
         for x, cell in enumerate(row):
             if cell:
                 pygame.draw.rect(surface, cell, pygame.Rect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
+                pygame.draw.rect(surface, GRAY, pygame.Rect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 2)
+    if active_tetromino:
+        for row_idx, row in enumerate(active_tetromino.shape):
+            for col_idx, cell in enumerate(row):
+                if cell:
+                    pygame.draw.rect(surface, active_tetromino.color, 
+                                     pygame.Rect((active_tetromino.x + col_idx) * GRID_SIZE, 
+                                                 (active_tetromino.y + row_idx) * GRID_SIZE, 
+                                                 GRID_SIZE, GRID_SIZE))
+                    pygame.draw.rect(surface, GRAY, 
+                                     pygame.Rect((active_tetromino.x + col_idx) * GRID_SIZE, 
+                                                 (active_tetromino.y + row_idx) * GRID_SIZE, 
+                                                 GRID_SIZE, GRID_SIZE), 2)
 
 def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     running = True
     grid = [[None for _ in range(COLUMNS)] for _ in range(ROWS)]
-    tetrominos = [Tetromino(grid)]
+    tetromino = Tetromino(grid)
     fall_time = 0
     fall_speed = 30
 
     while running:
         screen.fill(BLACK)
         draw_grid(screen)
-        draw_tetrominos(screen, grid)
+        draw_tetrominos(screen, grid, tetromino)
         pygame.display.flip()
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if not tetrominos[-1].landed:
+                if not tetromino.landed:
                     if event.key == pygame.K_LEFT:
-                        tetrominos[-1].move(-1, 0)
+                        tetromino.move(-1, 0)
                     elif event.key == pygame.K_RIGHT:
-                        tetrominos[-1].move(1, 0)
+                        tetromino.move(1, 0)
                     elif event.key == pygame.K_DOWN:
-                        tetrominos[-1].move(0, 1)
+                        tetromino.move(0, 1)
                     elif event.key == pygame.K_UP:
-                        tetrominos[-1].rotate()
+                        tetromino.rotate()
                     elif event.key == pygame.K_SPACE:
-                        tetrominos[-1].hard_drop()
+                        tetromino.hard_drop()
         
         fall_time += 1
         if fall_time >= fall_speed:
-            if not tetrominos[-1].landed:
-                tetrominos[-1].move(0, 1)
-                tetrominos[-1].check_landing()
+            if not tetromino.landed:
+                tetromino.move(0, 1)
+                tetromino.check_landing()
             fall_time = 0
         
-        if tetrominos[-1].landed:
-            tetrominos.append(Tetromino(grid))
+        if tetromino.landed:
+            tetromino = Tetromino(grid)
         
         clock.tick(10)
 
