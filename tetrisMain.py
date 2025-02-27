@@ -5,9 +5,9 @@ import random
 pygame.init()
 
 # Constants
-WIDTH, HEIGHT = 300, 600
+WIDTH, HEIGHT = 400, 700  # Increased height to make space for score
 GRID_SIZE = 30
-COLUMNS, ROWS = WIDTH // GRID_SIZE, HEIGHT // GRID_SIZE
+COLUMNS, ROWS = WIDTH // GRID_SIZE, (HEIGHT - 100) // GRID_SIZE  # Leave 100px for score display
 WHITE, BLACK, GRAY = (255, 255, 255), (0, 0, 0), (128, 128, 128)
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 165, 0)]
 
@@ -80,27 +80,27 @@ def clear_rows(grid):
 
 def draw_grid(surface):
     for x in range(0, WIDTH, GRID_SIZE):
-        pygame.draw.line(surface, WHITE, (x, 0), (x, HEIGHT))
-    for y in range(0, HEIGHT, GRID_SIZE):
+        pygame.draw.line(surface, WHITE, (x, 100), (x, HEIGHT))
+    for y in range(100, HEIGHT, GRID_SIZE):
         pygame.draw.line(surface, WHITE, (0, y), (WIDTH, y))
 
 def draw_tetrominos(surface, grid, active_tetromino):
     for y, row in enumerate(grid):
         for x, cell in enumerate(row):
             if cell:
-                pygame.draw.rect(surface, cell, pygame.Rect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
-                pygame.draw.rect(surface, GRAY, pygame.Rect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 2)
+                pygame.draw.rect(surface, cell, pygame.Rect(x * GRID_SIZE, y * GRID_SIZE + 100, GRID_SIZE, GRID_SIZE))
+                pygame.draw.rect(surface, GRAY, pygame.Rect(x * GRID_SIZE, y * GRID_SIZE + 100, GRID_SIZE, GRID_SIZE), 2)
     if active_tetromino:
         for row_idx, row in enumerate(active_tetromino.shape):
             for col_idx, cell in enumerate(row):
                 if cell:
                     pygame.draw.rect(surface, active_tetromino.color, 
                                      pygame.Rect((active_tetromino.x + col_idx) * GRID_SIZE, 
-                                                 (active_tetromino.y + row_idx) * GRID_SIZE, 
+                                                 (active_tetromino.y + row_idx) * GRID_SIZE + 100, 
                                                  GRID_SIZE, GRID_SIZE))
                     pygame.draw.rect(surface, GRAY, 
                                      pygame.Rect((active_tetromino.x + col_idx) * GRID_SIZE, 
-                                                 (active_tetromino.y + row_idx) * GRID_SIZE, 
+                                                 (active_tetromino.y + row_idx) * GRID_SIZE + 100, 
                                                  GRID_SIZE, GRID_SIZE), 2)
 
 def draw_score(surface, score):
@@ -120,9 +120,9 @@ def main():
 
     while running:
         screen.fill(BLACK)
+        draw_score(screen, score)
         draw_grid(screen)
         draw_tetrominos(screen, grid, tetromino)
-        draw_score(screen, score)
         pygame.display.flip()
         
         for event in pygame.event.get():
